@@ -3,6 +3,7 @@ import { Inter, Cormorant } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,7 +20,7 @@ const cormorant = Cormorant({
 });
 
 export const metadata: Metadata = {
-  title: "SCOR AI",
+  title: "Scor AI",
   description: "Transforma tu idea en un producto digital con especificación y código base",
 };
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         >
           <Navbar />
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

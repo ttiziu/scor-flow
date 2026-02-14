@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,11 +12,31 @@ import { Spinner } from "@/components/ui/spinner";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    if (!email) {
+      toast.error("Completa este campo", { description: "Ingresa tu email" });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Email inválido", { description: "Ingresa un email válido" });
+      return;
+    }
+    if (!password) {
+      toast.error("Completa este campo", { description: "Ingresa tu contraseña" });
+      return;
+    }
+
     setLoading(true);
     // TODO: integrar auth real
-    setTimeout(() => setLoading(false), 1500);
+    setTimeout(() => {
+      setLoading(false);
+      toast.success("Sesión iniciada");
+    }, 1500);
   };
 
   return (
@@ -28,14 +49,14 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="tu@email.com" required />
+              <Input id="email" name="email" type="email" placeholder="tu@email.com" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" placeholder="••••••••" required />
+              <Input id="password" name="password" type="password" placeholder="••••••••" />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (

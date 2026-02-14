@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import JSZip from "jszip";
 import StackBlitzSDK from "@stackblitz/sdk";
 import { Sparkles, Download, ExternalLink, FileCode, ChevronDown, ArrowUp } from "lucide-react";
@@ -37,20 +38,22 @@ export default function HomePage() {
   const [files, setFiles] = useState<GeneratedFile[] | null>(null);
   const [loadingSpec, setLoadingSpec] = useState(false);
   const [loadingCode, setLoadingCode] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleGenerateSpec = async () => {
     const trimmed = idea.trim();
-    if (!trimmed) return;
-    setError(null);
+    if (!trimmed) {
+      toast.error("Completa el campo", { description: "Escribe una idea para generar el proyecto" });
+      return;
+    }
     setSpec(null);
     setFiles(null);
     setLoadingSpec(true);
     try {
       const data = await generateSpec(trimmed);
       setSpec(data);
+      toast.success("Especificación generada");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al generar especificación");
+      toast.error(e instanceof Error ? e.message : "Error al generar especificación");
     } finally {
       setLoadingSpec(false);
     }
@@ -58,14 +61,17 @@ export default function HomePage() {
 
   const handleGenerateCode = async () => {
     const trimmed = idea.trim();
-    if (!trimmed) return;
-    setError(null);
+    if (!trimmed) {
+      toast.error("Completa el campo", { description: "Escribe una idea primero" });
+      return;
+    }
     setLoadingCode(true);
     try {
       const data = await generateCode(trimmed, spec ?? undefined);
       setFiles(data.files);
+      toast.success("Código generado");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al generar código");
+      toast.error(e instanceof Error ? e.message : "Error al generar código");
     } finally {
       setLoadingCode(false);
     }
@@ -82,6 +88,7 @@ export default function HomePage() {
     a.download = (spec?.projectName || "scor-ai-project") + ".zip";
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("Descarga iniciada");
   };
 
   const handleOpenStackBlitz = () => {
@@ -220,13 +227,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-
-        {error && (
-          <Alert variant="destructive" className="mb-8">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         {loadingSpec && (
           <Card className="mb-8">
