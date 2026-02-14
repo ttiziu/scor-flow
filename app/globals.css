@@ -120,10 +120,18 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    @apply bg-background text-foreground;
+  }
+  *::selection,
+  *::-moz-selection {
+    background-color: rgba(180, 140, 255, 0.4);
+    color: inherit;
+  }
+  .dark *::selection,
+  .dark *::-moz-selection {
+    background-color: rgba(160, 120, 255, 0.45);
+    color: inherit;
   }
 }
