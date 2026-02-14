@@ -130,7 +130,7 @@ export function Navbar() {
             <NavigationMenuList className="gap-1">
               {/* Templates */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:text-foreground font-normal">
+                <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground focus:bg-transparent data-[state=open]:bg-transparent font-normal focus-visible:ring-0 focus-visible:outline-none">
                   Templates
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -149,7 +149,7 @@ export function Navbar() {
 
               {/* Recursos */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:text-foreground font-normal">
+                <NavigationMenuTrigger className="bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground focus:bg-transparent data-[state=open]:bg-transparent font-normal focus-visible:ring-0 focus-visible:outline-none">
                   Recursos
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -166,12 +166,12 @@ export function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Direct links - usando render como Base UI */}
+              {/* Direct links - sin fondo/sombra en hover */}
               <NavigationMenuItem>
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent font-normal",
+                    "bg-transparent font-normal hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:outline-none",
                     pathname === "/enterprise"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -183,7 +183,7 @@ export function Navbar() {
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent font-normal",
+                    "bg-transparent font-normal hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:outline-none",
                     pathname === "/pricing"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -195,7 +195,7 @@ export function Navbar() {
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "bg-transparent font-normal",
+                    "bg-transparent font-normal hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:outline-none",
                     pathname === "/faq"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"

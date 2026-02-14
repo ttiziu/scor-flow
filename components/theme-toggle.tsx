@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Necesario para evitar hydration mismatch: servidor y primer render del cliente
+  // deben coincidir (placeholder). Solo después del mount mostramos el tema real.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- patrón válido para evitar hydration mismatch
     setMounted(true);
   }, []);
 
@@ -27,9 +30,9 @@ export function ThemeToggle() {
       size="icon-sm"
       aria-label="Cambiar tema"
       className="size-9"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      {theme === "dark" ? (
+      {resolvedTheme === "dark" ? (
         <Sun className="size-4" />
       ) : (
         <Moon className="size-4" />
