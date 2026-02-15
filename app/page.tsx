@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import JSZip from "jszip";
 import StackBlitzSDK from "@stackblitz/sdk";
-import { Sparkles, Download, ExternalLink, FileCode, ChevronDown, ArrowUp } from "lucide-react";
+import { Sparkles, ExternalLink, FileCode, ChevronDown, ArrowUp, Play } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +37,8 @@ export default function HomePage() {
   const [files, setFiles] = useState<GeneratedFile[] | null>(null);
   const [loadingSpec, setLoadingSpec] = useState(false);
   const [loadingCode, setLoadingCode] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const handleGenerateSpec = async () => {
     const trimmed = idea.trim();
@@ -68,6 +69,7 @@ export default function HomePage() {
     setLoadingCode(true);
     try {
       const data = await generateCode(trimmed, spec ?? undefined);
+      setPreviewReady(false);
       setFiles(data.files);
       toast.success("Código generado");
     } catch (e) {
@@ -77,22 +79,8 @@ export default function HomePage() {
     }
   };
 
-  const handleDownloadZip = async () => {
-    if (!files?.length) return;
-    const zip = new JSZip();
-    files.forEach(({ path, content }) => zip.file(path, content));
-    const blob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (spec?.projectName || "scor-ai-project") + ".zip";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Descarga iniciada");
-  };
-
-  const handleOpenStackBlitz = () => {
-    if (!files?.length) return;
+  const getProjectPayload = useCallback(() => {
+    if (!files?.length) return null;
     const projectFiles = files.reduce(
       (acc, { path, content }) => {
         acc[path] = content;
@@ -100,15 +88,36 @@ export default function HomePage() {
       },
       {} as Record<string, string>
     );
-    StackBlitzSDK.openProject(
-      {
-        files: projectFiles,
-        template: "node",
-        title: spec?.projectName || "scor-ai-project",
-        description: spec?.description || "",
-      },
-      { newWindow: true }
-    );
+    return {
+      files: projectFiles,
+      template: "node" as const,
+      title: spec?.projectName || "scor-ai-project",
+      description: spec?.description || "",
+    };
+  }, [files, spec?.projectName, spec?.description]);
+
+  const handleVerEnVivo = async () => {
+    const project = getProjectPayload();
+    if (!project || !previewRef.current) return;
+    previewRef.current.innerHTML = "";
+    setPreviewReady(true);
+    try {
+      await StackBlitzSDK.embedProject(
+        previewRef.current,
+        project,
+        { view: "preview", height: 420, hideExplorer: true }
+      );
+      toast.success("Vista previa lista");
+    } catch {
+      toast.error("No se pudo cargar la vista previa. Abre en StackBlitz.");
+    }
+  };
+
+  const handleOpenStackBlitz = () => {
+    const project = getProjectPayload();
+    if (!project) return;
+    StackBlitzSDK.openProject(project, { newWindow: true });
+    toast.success("Abriendo en StackBlitz");
   };
 
   const quickIdeas = [
@@ -302,40 +311,53 @@ export default function HomePage() {
         )}
 
         {files && files.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">Código generado</CardTitle>
-              <CardDescription>
-                {files.length} archivos listos. Descarga el ZIP o ábrelos en StackBlitz.
-              </CardDescription>
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Button onClick={handleDownloadZip} size="sm">
-                  <Download className="size-4" />
-                  Descargar ZIP
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleOpenStackBlitz}>
-                  <ExternalLink className="size-4" />
-                  Abrir en StackBlitz
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {files.map((file, i) => (
-                  <AccordionItem key={i} value={`file-${i}`}>
-                    <AccordionTrigger className="font-mono text-sm">
-                      {file.path}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <pre className="overflow-auto rounded-md bg-muted p-4 text-xs">
-                        <code>{file.content}</code>
-                      </pre>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
+          <>
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">Proyecto generado</CardTitle>
+                <CardDescription>
+                  {files.length} archivos. Ver en vivo aquí (como en v0) o abrirlo en StackBlitz para editar.
+                </CardDescription>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button onClick={handleVerEnVivo} size="sm" disabled={previewReady}>
+                    <Play className="size-4" />
+                    Ver en vivo
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleOpenStackBlitz}>
+                    <ExternalLink className="size-4" />
+                    Abrir en StackBlitz
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div
+                  ref={previewRef}
+                  className="min-h-[420px] w-full overflow-hidden rounded-lg border bg-muted/30"
+                />
+              </CardContent>
+            </Card>
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-base">Archivos generados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {files.map((file, i) => (
+                    <AccordionItem key={i} value={`file-${i}`}>
+                      <AccordionTrigger className="font-mono text-sm">
+                        {file.path}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <pre className="overflow-auto rounded-md bg-muted p-4 text-xs">
+                          <code>{file.content}</code>
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </>
         )}
       </div>
     </div>
