@@ -1,12 +1,22 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { toast } from "sonner";
 import StackBlitzSDK from "@stackblitz/sdk";
 import { Sparkles, ExternalLink, FileCode, ChevronDown, ArrowUp, Play } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/use-auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,15 +42,27 @@ import {
 } from "@/lib/api";
 
 export default function HomePage() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [idea, setIdea] = useState("");
   const [spec, setSpec] = useState<GenerateSpecResponse | null>(null);
   const [files, setFiles] = useState<GeneratedFile[] | null>(null);
   const [loadingSpec, setLoadingSpec] = useState(false);
   const [loadingCode, setLoadingCode] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  const requireAuth = useCallback(() => {
+    if (authLoading) return true; // Bloquear mientras carga
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return true;
+    }
+    return false;
+  }, [isAuthenticated, authLoading]);
+
   const handleGenerateSpec = async () => {
+    if (requireAuth()) return;
     const trimmed = idea.trim();
     if (!trimmed) {
       toast.error("Completa el campo", { description: "Escribe una idea para generar el proyecto" });
@@ -61,6 +83,7 @@ export default function HomePage() {
   };
 
   const handleGenerateCode = async () => {
+    if (requireAuth()) return;
     const trimmed = idea.trim();
     if (!trimmed) {
       toast.error("Completa el campo", { description: "Escribe una idea primero" });
@@ -150,6 +173,9 @@ export default function HomePage() {
               placeholder="Pide a scor que construya... Ej: Una app de tareas con lista, botón añadir y marcar completadas"
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
+              onFocus={() => {
+                if (!authLoading && !isAuthenticated) setAuthModalOpen(true);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -359,6 +385,41 @@ export default function HomePage() {
             </Card>
           </>
         )}
+
+        {/* Modal de autenticación requerida (estilo v0) */}
+        <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
+          <DialogContent showCloseButton={false} className="sm:max-w-md">
+            <DialogHeader className="text-center sm:text-center">
+              <div className="mx-auto mb-4 flex items-center justify-center">
+                <Image
+                  src="/scorai.svg"
+                  alt="Scor"
+                  width={64}
+                  height={64}
+                  className="size-16"
+                />
+              </div>
+              <DialogTitle className="text-center font-serif text-3xl font-extrabold italic tracking-tight">
+                Continuar con Scor
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                Para usar Scor, inicia sesión en tu cuenta o crea una nueva.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button asChild size="lg" className="w-full">
+                <Link href="/signup" onClick={() => setAuthModalOpen(false)}>
+                  Registrarse
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full">
+                <Link href="/login" onClick={() => setAuthModalOpen(false)}>
+                  Iniciar sesión
+                </Link>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
