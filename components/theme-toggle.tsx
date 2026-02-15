@@ -9,11 +9,10 @@ export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Necesario para evitar hydration mismatch: servidor y primer render del cliente
-  // deben coincidir (placeholder). Solo después del mount mostramos el tema real.
+  // Necesario para evitar hydration mismatch. setTimeout evita setState síncrono en effect.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- patrón válido para evitar hydration mismatch
-    setMounted(true);
+    const id = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(id);
   }, []);
 
   if (!mounted) {
