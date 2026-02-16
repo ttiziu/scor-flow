@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "@/lib/auth";
@@ -140,9 +141,13 @@ export function Navbar() {
           className="shrink-0 transition-opacity hover:opacity-80"
           aria-label="Scor - Inicio"
         >
-          <span className="font-serif text-xl font-semibold italic tracking-tight">
-            Scor
-          </span>
+          <Image
+            src="/scorai.svg"
+            alt="Scor"
+            width={32}
+            height={32}
+            className="size-8 dark:invert"
+          />
         </Link>
 
         {/* Desktop: Center nav - NavigationMenu */}
