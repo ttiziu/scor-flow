@@ -124,20 +124,18 @@ export function EmailLoginForm({
   }
 
   return (
-    <form onSubmit={handleSendCode} className={`space-y-4 ${className}`}>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="tu@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-        />
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
+    <form onSubmit={handleSendCode} className={`space-y-3 ${className}`}>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="nombre@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoComplete="email"
+        className="h-11"
+      />
+      <Button type="submit" className="h-11 w-full" disabled={loading}>
         {loading ? (
           <>
             <Spinner className="size-4" />
@@ -145,12 +143,12 @@ export function EmailLoginForm({
           </>
         ) : (
           mode === "signup"
-            ? "Enviar código de verificación"
+            ? "Continuar con email"
             : "Continuar con email"
         )}
       </Button>
       <p className="text-xs text-muted-foreground">
-        Te enviaremos un código de 8 dígitos. También puedes usar el enlace del correo.
+        Te enviaremos un código de 8 dígitos a tu correo.
       </p>
     </form>
   );

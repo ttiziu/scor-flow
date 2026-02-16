@@ -140,7 +140,7 @@ export function Navbar() {
           className="shrink-0 transition-opacity hover:opacity-80"
           aria-label="Scor - Inicio"
         >
-          <span className="font-serif text-2xl font-semibold italic tracking-tight">
+          <span className="font-serif text-xl font-semibold italic tracking-tight">
             Scor
           </span>
         </Link>

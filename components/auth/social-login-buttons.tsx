@@ -51,9 +51,11 @@ const PROVIDERS: {
 ];
 
 interface SocialLoginButtonsProps {
-  /** Texto alternativo para el botón Google (ej. "Crear cuenta con Google") */
+  /** Texto alternativo para el botón Google */
   googleLabel?: string;
-  /** Texto alternativo para el botón Discord (ej. "Crear cuenta con Discord") */
+  /** Texto alternativo para el botón GitHub */
+  githubLabel?: string;
+  /** Texto alternativo para el botón Discord */
   discordLabel?: string;
   /** Clase adicional para el contenedor */
   className?: string;
@@ -61,6 +63,7 @@ interface SocialLoginButtonsProps {
 
 export function SocialLoginButtons({
   googleLabel,
+  githubLabel,
   discordLabel,
   className = "",
 }: SocialLoginButtonsProps) {
@@ -108,9 +111,11 @@ export function SocialLoginButtons({
               {icon}
               {id === "google" && googleLabel
                 ? googleLabel
-                : id === "discord" && discordLabel
-                  ? discordLabel
-                  : label}
+                : id === "github" && githubLabel
+                  ? githubLabel
+                  : id === "discord" && discordLabel
+                    ? discordLabel
+                    : label}
             </>
           )}
         </Button>
