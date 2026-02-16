@@ -396,7 +396,7 @@ export default function HomePage() {
                   alt="Scor"
                   width={64}
                   height={64}
-                  className="size-16"
+                  className="size-16 dark:invert"
                 />
               </div>
               <DialogTitle className="text-center font-serif text-3xl font-extrabold italic tracking-tight">
