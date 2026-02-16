@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { signOut } from "@/lib/auth";
 import {
   Menu,
+  X,
   Sparkles,
   Home,
   FileCode,
@@ -40,12 +41,6 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -233,10 +228,16 @@ export function Navbar() {
           </NavigationMenu>
         </nav>
 
-        {/* Desktop: Right actions - theme (solo si no logueado), GitHub, auth */}
-        <div className="hidden md:flex items-center gap-1 shrink-0">
-          {!isAuthenticated && <ThemeToggle />}
-          <GitHubStars />
+        {/* Right: theme, GitHub, auth - avatar visible en mobile cuando logueado */}
+        <div className="flex items-center gap-1 shrink-0">
+          {!isAuthenticated && (
+            <div className="hidden md:flex">
+              <ThemeToggle />
+            </div>
+          )}
+          <div className="hidden md:flex">
+            <GitHubStars />
+          </div>
           {isAuthenticated && session?.user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -379,278 +380,88 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
+            <div className="hidden md:flex items-center gap-1">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/login">Sign In</Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/signup">Sign Up</Link>
               </Button>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Mobile: Menu button */}
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon-sm" aria-label="Abrir menú">
-              <Menu className="size-5" />
+        {/* Mobile: menú debajo del navbar, hamburguesa → X al abrir */}
+        {!isAuthenticated && (
+        <DropdownMenu open={mobileOpen} onOpenChange={setMobileOpen}>
+          <DropdownMenuTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon-sm" aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}>
+              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="flex w-[300px] flex-col p-0 sm:w-[320px]">
-            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-            <div className="flex flex-col overflow-y-auto">
-              {/* Header */}
-              <div className="border-b px-5 py-4 pr-12">
-                <Link
-                  href="/"
-                  className="flex items-center gap-2 font-serif text-lg italic"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <Sparkles className="size-5" />
-                  Scor
-                </Link>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            sideOffset={8}
+            className="w-[280px] min-w-[280px] p-0"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <div className="flex flex-col gap-6 p-5">
+              {/* Botones auth arriba */}
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}>
+                    Iniciar sesión
+                  </Link>
+                </Button>
+                <Button className="w-full" asChild>
+                  <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                    Registrarse
+                  </Link>
+                </Button>
               </div>
 
-              {/* Nav */}
-              <nav className="flex flex-1 flex-col py-4">
-                {/* Inicio */}
+              {/* Enlaces simples sin iconos */}
+              <nav className="flex flex-col gap-1">
                 <Link
-                  href="/"
-                  className="flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/60"
+                  href="/templates"
+                  className="py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => setMobileOpen(false)}
                 >
-                  <Home className="size-4 text-muted-foreground" />
-                  Inicio
+                  Templates
                 </Link>
-
-                {/* Templates */}
-                <div className="mt-2 px-5">
-                  <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Templates
-                  </p>
-                  <ul className="space-y-0.5">
-                    {templateLinks.map((link) => (
-                      <li key={link.label}>
-                        <Link
-                          href={link.href}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <link.icon className="size-4 shrink-0 text-muted-foreground" />
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Recursos */}
-                <div className="mt-4 px-5">
-                  <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Recursos
-                  </p>
-                  <ul className="space-y-0.5">
-                    {resourceLinks.map((link) => (
-                      <li key={link.label}>
-                        <Link
-                          href={link.href}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <link.icon className="size-4 shrink-0 text-muted-foreground" />
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Producto */}
-                <div className="mt-4 px-5">
-                  <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Producto
-                  </p>
-                  <ul className="space-y-0.5">
-                    {[
-                      { href: "/enterprise", label: "Enterprise", icon: Building2 },
-                      { href: "/pricing", label: "Pricing", icon: CreditCard },
-                      { href: "/faq", label: "FAQ", icon: HelpCircle },
-                    ].map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <link.icon className="size-4 shrink-0 text-muted-foreground" />
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <Link
+                  href="/enterprise"
+                  className="py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Enterprise
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/docs"
+                  className="py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Documentación
+                </Link>
+                <Link
+                  href="/faq"
+                  className="py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  FAQ
+                </Link>
               </nav>
-
-              {/* Footer: utils + auth */}
-              <div className="mt-auto border-t px-5 py-4">
-                <div className="mb-4 flex items-center gap-1">
-                  {!isAuthenticated && <ThemeToggle />}
-                  <GitHubStars />
-                </div>
-                {isAuthenticated && session?.user ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 px-1">
-                      <Avatar size="sm" className="size-9">
-                        <AvatarImage
-                          src={getAvatarUrl(session.user)}
-                          alt=""
-                          referrerPolicy="no-referrer"
-                        />
-                        <AvatarFallback className="text-sm">
-                          {session.user.email?.[0]?.toUpperCase() ?? "?"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold truncate">{getDisplayName(session.user)}</p>
-                        <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        href="/perfil"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                      >
-                        <User className="size-4 shrink-0 text-muted-foreground" />
-                        Perfil
-                      </Link>
-                      <Link
-                        href="/perfil"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                      >
-                        <Settings className="size-4 shrink-0 text-muted-foreground" />
-                        Configuración
-                      </Link>
-                      <Link
-                        href="/pricing"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                      >
-                        <DollarSign className="size-4 shrink-0 text-muted-foreground" />
-                        Precios
-                      </Link>
-                      <Link
-                        href="/docs"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                      >
-                        <BookOpen className="size-4 shrink-0 text-muted-foreground" />
-                        Documentación
-                      </Link>
-                      <a
-                        href="https://github.com/ttiziu/scor-flow/discussions"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-                      >
-                        <Users className="size-4 shrink-0 text-muted-foreground" />
-                        Foro de la comunidad
-                        <ExternalLink className="size-3.5 ml-auto opacity-60" />
-                      </a>
-                      <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground">
-                        <Eye className="size-4 shrink-0" />
-                        Credits
-                        <span className="ml-auto font-medium">—</span>
-                      </div>
-                    </div>
-                    <div className="border-t pt-3 space-y-2">
-                      <p className="px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                        Preferencias
-                      </p>
-                      <div className="flex items-center justify-between px-3 py-2">
-                        <span className="text-sm text-muted-foreground">Tema</span>
-                        <div className="flex rounded-md border border-border bg-muted/30 p-0.5">
-                          <button
-                            type="button"
-                            onClick={() => setTheme("system")}
-                            className={cn(
-                              "rounded p-1.5 transition-colors",
-                              (theme ?? "system") === "system"
-                                ? "bg-background shadow-sm text-foreground"
-                                : "text-muted-foreground hover:text-foreground"
-                            )}
-                            aria-label="Sistema"
-                          >
-                            <Monitor className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setTheme("light")}
-                            className={cn(
-                              "rounded p-1.5 transition-colors",
-                              (theme ?? "system") === "light"
-                                ? "bg-background shadow-sm text-foreground"
-                                : "text-muted-foreground hover:text-foreground"
-                            )}
-                            aria-label="Claro"
-                          >
-                            <Sun className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setTheme("dark")}
-                            className={cn(
-                              "rounded p-1.5 transition-colors",
-                              (theme ?? "system") === "dark"
-                                ? "bg-background shadow-sm text-foreground"
-                                : "text-muted-foreground hover:text-foreground"
-                            )}
-                            aria-label="Oscuro"
-                          >
-                            <Moon className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between px-3 py-2">
-                        <span className="text-sm text-muted-foreground">Idioma</span>
-                        <span className="text-sm">Español (Beta)</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => {
-                        signOut().then(() => {
-                          setMobileOpen(false);
-                          window.location.reload();
-                        });
-                      }}
-                    >
-                      <LogOut className="size-4" />
-                      Cerrar sesión
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href="/login" onClick={() => setMobileOpen(false)}>
-                        Sign In
-                      </Link>
-                    </Button>
-                    <Button className="w-full" asChild>
-                      <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                        Sign Up
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
-          </SheetContent>
-        </Sheet>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        )}
       </div>
     </header>
   );
